@@ -1,14 +1,11 @@
 package main
 
 import (
-	"context"
 	"flag"
 
 	"github.com/UpLiftL1f3/hotel-reservation/api"
 	"github.com/UpLiftL1f3/hotel-reservation/db"
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Create a new fiber instance with custom config
@@ -23,22 +20,28 @@ func main() {
 	flag.Parse()
 
 	//-> Setting up connection to the Database
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DB_URI))
+	client, err := db.GenerateClient()
 	if err != nil {
 		panic(err)
 	}
 
 	//-> USER HANDLERS
-	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, db.DBNAME))
+	var (
+		userHandler  = api.NewUserHandler(db.NewMongoUserStore(client))
+		hotelStore   = db.NewMongoHotelStore(client)
+		roomStore    = db.NewMongoRoomStore(client, hotelStore)
+		hotelHandler = api.NewHotelHandler(db.NewMongoHotelStore(client), roomStore)
+		app          = *fiber.New(config)
+		apiV1        = app.Group("/api/v1")
+	)
 
-	app := fiber.New(config)
-	apiV1 := app.Group("/api/v1")
-
-	apiV1.Get("/users", userHandler.HandleGetUsers)
+	apiV1.Get("/user", userHandler.HandleGetUsers)
 	apiV1.Post("/user", userHandler.HandlePostUser)
 	apiV1.Put("/user/:id", userHandler.HandlePutUser)
 	apiV1.Get("/user/:id", userHandler.HandleGetUser)
 	apiV1.Delete("/user/:id", userHandler.HandlerDeleteUser)
 
+	// hotel Handlers
+	apiV1.Get("/hotel", hotelHandler.HandleGetHotels)
 	app.Listen(*listenAddr)
 }
