@@ -15,8 +15,49 @@ var (
 	client     *mongo.Client
 	roomStore  db.RoomStore
 	hotelStore db.HotelStore
+	userStore  db.UserStore
 	ctx        = context.Background()
 )
+
+func main() {
+	seedHotel("Bellucia", "France", 3)
+	seedHotel("The cozy hotel", "The Netherlands", 4)
+	seedHotel("High as a cloud", "Tennessee", 5)
+	seedUser("James", "Foo", "jamesFoo@gmail.com")
+}
+
+func init() {
+	var err error
+	client, err = db.GenerateClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+
+	hotelStore = db.NewMongoHotelStore(client)
+	roomStore = db.NewMongoRoomStore(client, hotelStore)
+	userStore = db.NewMongoUserStore(client)
+}
+
+func seedUser(fName, lName, email string) {
+	user, err := types.NewUserFromParams(types.CreateUserParams{
+		Email:     email,
+		FirstName: fName,
+		LastName:  lName,
+		Password:  "superSecurePassword",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = userStore.InsertUser(context.TODO(), user)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func seedHotel(name, location string, rating int) {
 	hotel := types.Hotel{
@@ -28,16 +69,16 @@ func seedHotel(name, location string, rating int) {
 
 	rooms := []types.Room{
 		{
-			Type:      types.SingleRoomType,
-			BasePrice: 99.9,
+			Size:  "small",
+			Price: 99.9,
 		},
 		{
-			Type:      types.DeluxeRoomType,
-			BasePrice: 199.9,
+			Size:  "normal",
+			Price: 199.9,
 		},
 		{
-			Type:      types.SeaSideRoomType,
-			BasePrice: 122.9,
+			Size:  "king",
+			Price: 122.9,
 		},
 	}
 
@@ -57,25 +98,4 @@ func seedHotel(name, location string, rating int) {
 	// fmt.Println(insertedHotel)
 
 	fmt.Println("seeding the database")
-}
-
-func main() {
-	seedHotel("Bellucia", "France", 3)
-	seedHotel("The cozy hotel", "The Netherlands", 4)
-	seedHotel("High as a cloud", "Tennessee", 5)
-}
-
-func init() {
-	var err error
-	client, err = db.GenerateClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
-		log.Fatal(err)
-	}
-
-	hotelStore = db.NewMongoHotelStore(client)
-	roomStore = db.NewMongoRoomStore(client, hotelStore)
 }

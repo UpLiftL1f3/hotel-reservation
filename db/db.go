@@ -7,11 +7,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-//-> this file is going to be used for General DB things (aka helper files, etc)
+type Store struct {
+	User    UserStore
+	Hotel   HotelStore
+	Room    RoomStore
+	Booking BookingStore
+}
 
-const DB_URI = "mongodb://localhost:27017"
-const DBNAME = "hotel-reservation"
-const TestDBNAME = "hotel-reservation-test"
+// -> this file is going to be used for General DB things (aka helper files, etc)
+const (
+	DB_URI     = "mongodb://localhost:27017"
+	DBNAME     = "hotel-reservation"
+	TestDBNAME = "hotel-reservation-test"
+)
 
 func GenerateClient() (*mongo.Client, error) {
 	//-> Setting up connection to the Database

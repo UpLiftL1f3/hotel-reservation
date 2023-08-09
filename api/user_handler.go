@@ -16,12 +16,14 @@ type UserHandler struct {
 	UserStore db.UserStore
 }
 
+// -> CREATE NEW USER
 func NewUserHandler(userStore db.UserStore) *UserHandler {
 	return &UserHandler{
 		UserStore: userStore,
 	}
 }
 
+// -> DELETE USER
 func (h *UserHandler) HandlerDeleteUser(c *fiber.Ctx) error {
 	userID := c.Params("id")
 
@@ -32,6 +34,7 @@ func (h *UserHandler) HandlerDeleteUser(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{"Deleted": userID})
 }
 
+// -> UPDATE USER
 func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 	var (
 		// updates bson.M
