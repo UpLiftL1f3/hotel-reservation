@@ -41,7 +41,7 @@ func (s *MongoUserStore) Drop(ctx context.Context) error {
 }
 
 func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, params types.UpdateUserParams) error {
-	finalUpdates := bson.M{"$set": params.ToBSON()}
+	finalUpdates := bson.M{"$set": params}
 	_, err := s.collection.UpdateOne(ctx, filter, finalUpdates)
 	if err != nil {
 		return err

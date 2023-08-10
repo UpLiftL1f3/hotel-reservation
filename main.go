@@ -75,6 +75,7 @@ func main() {
 	// -> Booking Handlers
 	apiV1.Get("/booking", bookingHandler.HandleGetBookings)
 	apiV1.Get("/booking/:id", bookingHandler.HandleGetBooking)
+	apiV1.Put("/booking/:id", bookingHandler.HandleUpdateBooking)
 
 	//-> Admin Handlers
 	admin.Get("/booking", bookingHandler.HandleGetBookings)

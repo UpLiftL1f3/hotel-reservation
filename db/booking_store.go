@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/UpLiftL1f3/hotel-reservation/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,6 +18,7 @@ type BookingStore interface {
 	InsertBooking(context.Context, *types.Booking) (*types.Booking, error)
 	GetBookings(context.Context, bson.M) ([]*types.Booking, error)
 	GetBookingByID(context.Context, string) (*types.Booking, error)
+	UpdateBooking(context.Context, string, types.UpdateBookingParams) (*types.Booking, error)
 }
 
 type MongoBookingStore struct {
@@ -67,6 +69,37 @@ func (s *MongoBookingStore) GetBookingByID(ctx context.Context, id string) (*typ
 	var booking *types.Booking
 	if err := resp.Decode(&booking); err != nil {
 		return nil, err
+	}
+
+	return booking, nil
+}
+
+func (s *MongoBookingStore) UpdateBooking(ctx context.Context, id string, updateParams types.UpdateBookingParams) (*types.Booking, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	m := bson.M{
+		"$set": updateParams,
+	}
+
+	fmt.Println("INFO FOR UPDATE", oid, updateParams)
+
+	resp, err := s.collection.UpdateByID(ctx, oid, m)
+	if err != nil {
+		return nil, fmt.Errorf("%v (HELPPP)", err)
+	}
+
+	var booking *types.Booking
+
+	if resp.MatchedCount == 1 && resp.ModifiedCount == 1 {
+		err := s.collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&booking)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("Update operation did not match or modify exactly one document")
 	}
 
 	return booking, nil

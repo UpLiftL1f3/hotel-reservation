@@ -83,12 +83,9 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 
 	// fmt.Println("Made it to handle BookRoom 2")
 
-	user, ok := c.Context().Value("user").(*types.User)
-	if !ok {
-		return c.Status(http.StatusInternalServerError).JSON(GenericResponse{
-			Type: "error",
-			Msg:  "internal server error",
-		})
+	user, err := GetAuthenticatedUser(c)
+	if err != nil {
+		return err
 	}
 
 	isAvailable, err := h.isRoomAvailableForBooking(c.Context(), roomID, params)

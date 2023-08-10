@@ -71,13 +71,13 @@ func (a *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 
 	authResp := AuthResponse{
 		User:  user,
-		Token: createTokenFromUser(user),
+		Token: CreateTokenFromUser(user),
 	}
 
 	return c.JSON(authResp)
 }
 
-func createTokenFromUser(user *types.User) string {
+func CreateTokenFromUser(user *types.User) string {
 	now := time.Now()
 	expires := now.Add(time.Hour * 4).Unix()
 	claims := jwt.MapClaims{

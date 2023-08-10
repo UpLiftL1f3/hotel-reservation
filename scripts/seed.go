@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/UpLiftL1f3/hotel-reservation/api"
 	"github.com/UpLiftL1f3/hotel-reservation/db"
 	"github.com/UpLiftL1f3/hotel-reservation/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -59,6 +60,8 @@ func seedUser(fName, lName, email, password string, isAdmin bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("%s -> %s\n", user.Email, api.CreateTokenFromUser(user))
 }
 
 func seedHotel(name, location string, rating int) {
