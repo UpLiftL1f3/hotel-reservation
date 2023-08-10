@@ -39,13 +39,17 @@ func main() {
 			User:    userStore,
 			Booking: bookingStore,
 		}
-		userHandler  = api.NewUserHandler(db.NewMongoUserStore(client))
-		hotelHandler = api.NewHotelHandler(store)
-		roomHandler  = api.NewRoomHandler(store)
-		authHandler  = api.NewAuthHandler(userStore)
-		app          = *fiber.New(config)
-		auth         = app.Group("/api")
-		apiV1        = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
+		userHandler    = api.NewUserHandler(db.NewMongoUserStore(client))
+		hotelHandler   = api.NewHotelHandler(store)
+		roomHandler    = api.NewRoomHandler(store)
+		bookingHandler = api.NewBookingHandler(store)
+		authHandler    = api.NewAuthHandler(userStore)
+		app            = *fiber.New(config)
+		auth           = app.Group("/api")
+		apiV1          = app.Group("/api/v1", middleware.JWTAuthentication(userStore))
+
+		// -> since you wrote apiV1 you inherit the "/api/v1" and add it to .../admin
+		admin = apiV1.Group("/admin", middleware.AdminAuth)
 	)
 
 	// -> Auth
@@ -63,7 +67,17 @@ func main() {
 	apiV1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
 	apiV1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
 
-	// -> Book a room
+	// -> Rooms Handlers
+	apiV1.Get("/room", roomHandler.HandleGetRooms)
 	apiV1.Post("/room/:id/book", roomHandler.HandleBookRoom)
+
+	//TODO: Cancel a booking
+	// -> Booking Handlers
+	apiV1.Get("/booking", bookingHandler.HandleGetBookings)
+	apiV1.Get("/booking/:id", bookingHandler.HandleGetBooking)
+
+	//-> Admin Handlers
+	admin.Get("/booking", bookingHandler.HandleGetBookings)
 	app.Listen(*listenAddr)
+
 }

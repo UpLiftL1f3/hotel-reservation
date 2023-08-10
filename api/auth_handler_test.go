@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -67,7 +66,7 @@ func TestAuthenticateSuccess(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(authResp)
+	// fmt.Println(authResp)
 
 	if authResp.Token == "" {
 		t.Fatalf("expected the JWT token to be present in the auth response")

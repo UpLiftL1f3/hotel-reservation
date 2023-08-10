@@ -52,7 +52,7 @@ func (a *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	if err := c.BodyParser(&params); err != nil {
 		return err
 	}
-	fmt.Println(params)
+	// fmt.Println(params)
 
 	// -> FIND USER
 	user, err := a.userStore.GetUserByEmail(c.Context(), params.Email)
@@ -62,7 +62,7 @@ func (a *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 		}
 		return err
 	}
-	fmt.Println(user)
+	// fmt.Println(user)
 
 	// -> Compare Password
 	if !types.IsValidPassword(user.EncryptedPassword, params.Password) {
@@ -88,9 +88,9 @@ func createTokenFromUser(user *types.User) string {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims, nil)
 	secret := os.Getenv("JWT_SECRET")
-	fmt.Println("Secret from Getenv: ", secret)
-	result := fmt.Sprintf("%T", secret)
-	fmt.Println("type of secret: ", result)
+	// fmt.Println("Secret from Getenv: ", secret)
+	// result := fmt.Sprintf("%T", secret)
+	// fmt.Println("type of secret: ", result)
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {

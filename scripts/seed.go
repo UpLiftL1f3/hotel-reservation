@@ -23,7 +23,8 @@ func main() {
 	seedHotel("Bellucia", "France", 3)
 	seedHotel("The cozy hotel", "The Netherlands", 4)
 	seedHotel("High as a cloud", "Tennessee", 5)
-	seedUser("James", "Foo", "jamesFoo@gmail.com")
+	seedUser("James", "Foo", "jamesFoo@gmail.com", "superSecurePassword", false)
+	seedUser("Admin", "Admin", "Admin@admin.com", "adminAdminAdmin", true)
 }
 
 func init() {
@@ -42,17 +43,18 @@ func init() {
 	userStore = db.NewMongoUserStore(client)
 }
 
-func seedUser(fName, lName, email string) {
+func seedUser(fName, lName, email, password string, isAdmin bool) {
 	user, err := types.NewUserFromParams(types.CreateUserParams{
 		Email:     email,
 		FirstName: fName,
 		LastName:  lName,
-		Password:  "superSecurePassword",
+		Password:  password,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	user.IsAdmin = isAdmin
 	_, err = userStore.InsertUser(context.TODO(), user)
 	if err != nil {
 		log.Fatal(err)

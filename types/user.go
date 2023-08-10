@@ -22,6 +22,7 @@ type User struct {
 	LastName          string             `bson:"lastName" json:"lastName"`
 	Email             string             `bson:"email" json:"email"`
 	EncryptedPassword string             `bson:"EncryptedPassword" json:"-"`
+	IsAdmin           bool               `bson:"isAdmin" json:"isAdmin"`
 }
 
 type UpdateUserParams struct {
@@ -63,8 +64,9 @@ func (params CreateUserParams) Validate() map[string]string {
 	}
 
 	if !IsEmailValid(params.Email) {
-		errors["Eamil"] = fmt.Sprintln("email is invalid")
+		errors["Eamil"] = fmt.Sprintf("email %s is invalid", params.Email)
 	}
+
 	return errors
 }
 

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -72,7 +71,7 @@ func TestPostUser(t *testing.T) {
 
 	var user types.User
 	json.NewDecoder(resp.Body).Decode(&user)
-	fmt.Println(user)
+	// fmt.Println(user)
 
 	if len(user.ID) == 0 {
 		t.Errorf("expected a user id to be set")
@@ -124,7 +123,7 @@ func TestGetUser(t *testing.T) {
 
 	var user types.User
 	json.NewDecoder(resp.Body).Decode(&user)
-	fmt.Println(user)
+	// fmt.Println(user)
 
 	if len(user.ID) == 0 {
 		t.Errorf("expected a user id to be set")
@@ -160,6 +159,6 @@ func TestGetUser(t *testing.T) {
 	}
 
 	json.NewDecoder(response.Body).Decode(&getUser)
-	fmt.Println(user)
+	// fmt.Println(user)
 
 }

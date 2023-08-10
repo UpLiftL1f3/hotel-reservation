@@ -2,14 +2,6 @@ package types
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-// const (
-// 	None RoomType = iota
-// 	SingleRoomType
-// 	DoubleRoomType
-// 	SeaSideRoomType
-// 	DeluxeRoomType
-// )
-
 type Hotel struct {
 	ID       primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
 	Name     string               `bson:"name" json:"name"`
@@ -25,6 +17,7 @@ type Room struct {
 	Seaside bool               `bson:"seaside" json:"seaside"`
 	Price   float64            `bson:"price" json:"price"`
 	HotelID primitive.ObjectID `bson:"hotelID" json:"hotelID"`
+	// -> bson:"-" means I decided not to store it in the database
 }
 
 type RoomType int

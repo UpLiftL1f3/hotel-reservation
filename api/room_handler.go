@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/UpLiftL1f3/hotel-reservation/types"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type RoomHandler struct {
@@ -27,6 +29,43 @@ func NewRoomHandler(store *db.Store) *RoomHandler {
 	}
 }
 
+// -> HELPER FUNCTIONS
+func (p BookRoomParams) validate() error {
+	now := time.Now()
+	if now.After(p.FromDate) || now.After(p.TillDate) {
+		return fmt.Errorf("cannot book a room on a date that has already passed")
+	}
+	return nil
+}
+
+func (h *RoomHandler) isRoomAvailableForBooking(ctx context.Context, roomID primitive.ObjectID, params BookRoomParams) (bool, error) {
+
+	filter := bson.M{
+		"roomID": roomID,
+		"fromDate": bson.M{
+			"$gte": params.FromDate,
+		},
+		"tillDate": bson.M{
+			"$lte": params.TillDate,
+		},
+	}
+
+	bookings, err := h.store.Booking.GetBookings(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	if len(bookings) > 0 {
+		return false, nil
+	}
+
+	// fmt.Println("bookings: ", bookings)
+
+	return true, nil
+}
+
+// -> CRUD HANDLER FUNCTIONS
+
 func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	var params BookRoomParams
 	if err := c.BodyParser(&params); err != nil {
@@ -42,13 +81,24 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		return err
 	}
 
-	fmt.Println("Made it to handle BookRoom 2")
+	// fmt.Println("Made it to handle BookRoom 2")
 
 	user, ok := c.Context().Value("user").(*types.User)
 	if !ok {
 		return c.Status(http.StatusInternalServerError).JSON(GenericResponse{
 			Type: "error",
 			Msg:  "internal server error",
+		})
+	}
+
+	isAvailable, err := h.isRoomAvailableForBooking(c.Context(), roomID, params)
+	if !isAvailable || err != nil {
+		if err != nil {
+			return err
+		}
+		return c.Status(http.StatusInternalServerError).JSON(&GenericResponse{
+			Type: "error",
+			Msg:  "room is already booked",
 		})
 	}
 
@@ -68,10 +118,11 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	return c.JSON(inserted)
 }
 
-func (p BookRoomParams) validate() error {
-	now := time.Now()
-	if now.After(p.FromDate) || now.After(p.TillDate) {
-		return fmt.Errorf("cannot book a room on a date that has already passed")
+func (h *RoomHandler) HandleGetRooms(c *fiber.Ctx) error {
+	rooms, err := h.store.Room.GetRooms(c.Context(), bson.M{})
+
+	if err != nil {
+		return err
 	}
-	return nil
+	return c.JSON(rooms)
 }

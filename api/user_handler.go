@@ -2,7 +2,6 @@ package api
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/UpLiftL1f3/hotel-reservation/db"
 	"github.com/UpLiftL1f3/hotel-reservation/types"
@@ -105,11 +104,10 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 // -> GET USERS
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	users, err := h.UserStore.GetUsers(c.Context())
-	fmt.Println("USERS: ", users)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("USERS: ", users)
+	// fmt.Println("USERS: ", users)
 	return c.JSON(users)
 }

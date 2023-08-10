@@ -22,7 +22,7 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		if err != nil {
 			return err
 		}
-		fmt.Println(claims)
+		// fmt.Println(claims)
 
 		// -> Check token expiration
 		expiresFloat := claims["expires"].(float64)
@@ -38,6 +38,7 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		}
 
 		// -> Set the current authenticated user to the context
+		// fmt.Printf("Set user : %+v", user)
 		c.Context().SetUserValue("user", user)
 
 		return c.Next()
