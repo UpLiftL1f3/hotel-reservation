@@ -84,7 +84,7 @@ func (s *MongoBookingStore) UpdateBooking(ctx context.Context, id string, update
 		"$set": updateParams,
 	}
 
-	fmt.Println("INFO FOR UPDATE", oid, updateParams)
+	fmt.Printf("INFO FOR UPDATE %s, %#v", oid, updateParams)
 
 	resp, err := s.collection.UpdateByID(ctx, oid, m)
 	if err != nil {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/UpLiftL1f3/hotel-reservation/db"
@@ -57,17 +58,20 @@ func (h *BookingHandler) HandleUpdateBooking(c *fiber.Ctx) error {
 	if err := c.BodyParser(&updateParams); err != nil {
 		return err
 	}
+	fmt.Printf("Main 2 (update booking params): %#v", updateParams)
 
 	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("Main 3")
 	user, err := GetAuthenticatedUser(c)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("Main 4")
 	if !user.IsAdmin && booking.UserID != user.ID {
 		return c.Status(http.StatusUnauthorized).JSON(GenericResponse{
 			Type: "error",
@@ -75,6 +79,7 @@ func (h *BookingHandler) HandleUpdateBooking(c *fiber.Ctx) error {
 		})
 	}
 
+	fmt.Println("Main 5")
 	updatedBooking, err := h.store.Booking.UpdateBooking(c.Context(), id, updateParams)
 	if err != nil {
 		return err
