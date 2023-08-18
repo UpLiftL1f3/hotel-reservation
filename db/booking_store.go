@@ -74,6 +74,7 @@ func (s *MongoBookingStore) GetBookingByID(ctx context.Context, id string) (*typ
 	return booking, nil
 }
 
+// -> UPDATE only works for CANCELED
 func (s *MongoBookingStore) UpdateBooking(ctx context.Context, id string, updateParams types.UpdateBookingParams) (*types.Booking, error) {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
