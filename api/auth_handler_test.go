@@ -2,49 +2,49 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 
-	"github.com/UpLiftL1f3/hotel-reservation/db"
-	"github.com/UpLiftL1f3/hotel-reservation/types"
+	"github.com/UpLiftL1f3/hotel-reservation/db/fixtures"
 	"github.com/gofiber/fiber/v2"
 )
 
-func insertTestUser(t *testing.T, userStore db.UserStore) *types.User {
-	user, err := types.NewUserFromParams(types.CreateUserParams{
-		Email:     "james@foo.com",
-		FirstName: "james",
-		LastName:  "foo",
-		Password:  "superSecurePassword",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+// func insertTestUser(t *testing.T, userStore db.UserStore) *types.User {
+// 	user, err := types.NewUserFromParams(types.CreateUserParams{
+// 		Email:     "gil@foo.com",
+// 		FirstName: "gil",
+// 		LastName:  "bill",
+// 		Password:  "gil_bill",
+// 	})
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	_, err = userStore.InsertUser(context.TODO(), user)
-	if err != nil {
-		t.Fatal(err)
-	}
+// 	resp, err := userStore.InsertUser(context.TODO(), user)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
 
-	return user
-}
+// 	return resp
+// }
 
 func TestAuthenticateSuccess(t *testing.T) {
 	tdb := setup(t)
 	defer tdb.teardown(t)
-	insertedUser := insertTestUser(t, tdb.UserStore)
+	// insertedUser := insertTestUser(t, tdb.User)
+	insertedUser := fixtures.AddUser(tdb.Store, "james", "foo", false)
 
 	app := fiber.New()
-	authHandler := NewAuthHandler(tdb.UserStore)
+	authHandler := NewAuthHandler(tdb.User)
 	app.Post("/auth", authHandler.HandleAuthenticate)
 
 	params := AuthParams{
 		Email:    "james@foo.com",
-		Password: "superSecurePassword",
+		Password: "james_foo",
 	}
 
 	b, _ := json.Marshal(params)
@@ -73,6 +73,8 @@ func TestAuthenticateSuccess(t *testing.T) {
 	}
 
 	insertedUser.EncryptedPassword = ""
+	fmt.Println("Inserted User: ", insertedUser)
+	fmt.Println("authResp User: ", authResp.User)
 	if !reflect.DeepEqual(insertedUser, authResp.User) {
 		t.Fatalf("expected the user to be the inserted user")
 	}
@@ -81,10 +83,11 @@ func TestAuthenticateSuccess(t *testing.T) {
 func TestAuthenticateWithWrongPassword(t *testing.T) {
 	tdb := setup(t)
 	defer tdb.teardown(t)
-	insertTestUser(t, tdb.UserStore)
+	// insertTestUser(t, tdb.User)
+	fixtures.AddUser(tdb.Store, "james", "foo", false)
 
 	app := fiber.New()
-	authHandler := NewAuthHandler(tdb.UserStore)
+	authHandler := NewAuthHandler(tdb.User)
 	app.Post("/auth", authHandler.HandleAuthenticate)
 
 	params := AuthParams{
@@ -119,5 +122,4 @@ func TestAuthenticateWithWrongPassword(t *testing.T) {
 		t.Fatalf("expected genericResponse Message to be 'invalid credentials' but got %s", genericResp.Msg)
 	}
 
-	return
 }

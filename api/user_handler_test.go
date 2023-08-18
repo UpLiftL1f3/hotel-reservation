@@ -18,7 +18,7 @@ func TestPostUser(t *testing.T) {
 	defer tdb.teardown(t)
 
 	app := fiber.New()
-	UserHandler := NewUserHandler(tdb.UserStore)
+	UserHandler := NewUserHandler(tdb.User)
 	app.Post("/", UserHandler.HandlePostUser)
 
 	params := types.CreateUserParams{
@@ -67,7 +67,7 @@ func TestGetUser(t *testing.T) {
 	defer tbd.teardown(t)
 
 	app := fiber.New()
-	UserHandler := NewUserHandler(tbd)
+	UserHandler := NewUserHandler(tbd.User)
 
 	// First Create User to get ID
 	app.Post("/", UserHandler.HandlePostUser)
