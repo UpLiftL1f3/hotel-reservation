@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/UpLiftL1f3/hotel-reservation/db"
 	"github.com/UpLiftL1f3/hotel-reservation/types"
@@ -47,6 +48,8 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(&params); err != nil {
 		return ErrBadRequest()
 	}
+
+	fmt.Println("updatedParams: ", params)
 
 	// how to determine which document to update
 	filter := db.Map{"_id": oid}

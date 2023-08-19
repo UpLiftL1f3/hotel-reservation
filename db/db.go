@@ -14,6 +14,11 @@ type Store struct {
 	Booking BookingStore
 }
 
+type Pagination struct {
+	Limit int64
+	Page  int64
+}
+
 // -> this file is going to be used for General DB things (aka helper files, etc)
 const (
 	DB_URI     = "mongodb://localhost:27017"
