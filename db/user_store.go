@@ -13,13 +13,15 @@ import (
 
 const userCollection = "users"
 
+type Map map[string]any
+
 type UserStore interface {
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUserByEmail(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
 	DeleteUser(context.Context, string) error
-	UpdateUser(ctx context.Context, filter bson.M, updates types.UpdateUserParams) error
+	UpdateUser(ctx context.Context, filter Map, updates types.UpdateUserParams) error
 	Drop(context.Context) error
 }
 
@@ -40,7 +42,7 @@ func (s *MongoUserStore) Drop(ctx context.Context) error {
 	return s.collection.Drop(ctx)
 }
 
-func (s *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, params types.UpdateUserParams) error {
+func (s *MongoUserStore) UpdateUser(ctx context.Context, filter Map, params types.UpdateUserParams) error {
 	finalUpdates := bson.M{"$set": params}
 	_, err := s.collection.UpdateOne(ctx, filter, finalUpdates)
 	if err != nil {
