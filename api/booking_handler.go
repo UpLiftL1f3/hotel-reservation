@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/UpLiftL1f3/hotel-reservation/db"
 	"github.com/UpLiftL1f3/hotel-reservation/types"
@@ -33,7 +32,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	id := c.Params("id")
 	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
 	if err != nil {
-		return err
+		return ErrResourceNotFound("booking")
 	}
 
 	user, err := GetAuthenticatedUser(c)
@@ -42,10 +41,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	}
 
 	if !user.IsAdmin && booking.UserID != user.ID {
-		return c.Status(http.StatusUnauthorized).JSON(GenericResponse{
-			Type: "error",
-			Msg:  "not authorized",
-		})
+		return ErrUnAuthorized()
 	}
 
 	return c.JSON(booking)
@@ -56,13 +52,13 @@ func (h *BookingHandler) HandleUpdateBooking(c *fiber.Ctx) error {
 
 	var updateParams types.UpdateBookingParams
 	if err := c.BodyParser(&updateParams); err != nil {
-		return err
+		return ErrBadRequest()
 	}
 	fmt.Printf("Main 2 (update booking params): %#v", updateParams)
 
 	booking, err := h.store.Booking.GetBookingByID(c.Context(), id)
 	if err != nil {
-		return err
+		return ErrResourceNotFound("booking")
 	}
 
 	fmt.Println("Main 3")
@@ -73,10 +69,7 @@ func (h *BookingHandler) HandleUpdateBooking(c *fiber.Ctx) error {
 
 	fmt.Println("Main 4")
 	if !user.IsAdmin && booking.UserID != user.ID {
-		return c.Status(http.StatusUnauthorized).JSON(GenericResponse{
-			Type: "error",
-			Msg:  "not authorized",
-		})
+		return ErrUnAuthorized()
 	}
 
 	fmt.Println("Main 5")

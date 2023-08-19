@@ -8,7 +8,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type UserHandler struct {
@@ -42,15 +41,15 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 	)
 	oid, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return err
+		return ErrInvalidID()
 	}
 
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return ErrBadRequest()
 	}
 
 	// how to determine which document to update
-	filter := bson.M{"_id": oid}
+	filter := db.Map{"_id": oid}
 	if err := h.UserStore.UpdateUser(c.Context(), filter, params); err != nil {
 		return err
 	}
@@ -62,7 +61,7 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	var params types.CreateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return ErrBadRequest()
 	}
 
 	if errors := params.Validate(); len(errors) > 0 {
@@ -105,7 +104,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	users, err := h.UserStore.GetUsers(c.Context())
 	if err != nil {
-		return err
+		return ErrResourceNotFound("user")
 	}
 
 	// fmt.Println("USERS: ", users)
